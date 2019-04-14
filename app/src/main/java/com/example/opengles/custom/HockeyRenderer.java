@@ -17,48 +17,39 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class HockeyRenderer implements GLSurfaceView.Renderer {
 
-    private static final int POSITION_COMPONENT_COUNT = 2;
     private static final int BYTES_PER_FLOAT = 4;
+    private static final int POSITION_COMPONENT_COUNT = 2;
+    private static final int COLOR_COMPONENT_COUNT = 3;
+    // 跨距，每组数据之间跨距（目前数组中一组数据包含一个坐标位置和一组颜色值）
+    private static final int STRIDE = (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * BYTES_PER_FLOAT;
+
     private FloatBuffer vertexData;
 
     private float[] tableVerticesWithTriangles = {
-//            // 第一个三角形
-//            -0.5f, -0.5f,
-//            0.5f, 0.5f,
-//            -0.5f, 0.5f,
-//            // 第二个三角形
-//            -0.5f, -0.5f,
-//            0.5f, -0.5f,
-//            0.5f, 0.5f,
-//            // 中间的分界线
-//            -0.5f, 0f,
-//            0.5f, 0f,
-//            // 两个木槌的质点位置
-//            0f, -0.25f,
-//            0f, 0.25f
-
-            // 三角扇
-            0,     0,
-            -0.5f, -0.5f,
-            0.5f, -0.5f,
-            0.5f,  0.5f,
-            -0.5f,  0.5f,
-            -0.5f, -0.5f,
+            //  X, Y,        R, G, B
+            // 三角扇形
+            0, 0,           1f,     1f,     1f,
+            -0.5f, -0.5f,   0.7f,   0.7f,   0.7f,
+            0.5f, -0.5f,    0.7f,   0.7f,   0.7f,
+            0.5f, 0.5f,     0.7f,   0.7f,   0.7f,
+            -0.5f, 0.5f,    0.7f,   0.7f,   0.7f,
+            -0.5f, -0.5f,   0.7f,   0.7f,   0.7f,
             // 中间的分界线
-            -0.5f, 0f,
-            0.5f, 0f,
+            -0.5f, 0f,      1f,     0f,     0f,
+            0.5f, 0f,       1f,     0f,     0f,
             // 两个木槌的质点位置
-            0f, -0.25f,
-            0f, 0.25f
+            0f, -0.25f,     0f,     0f,     1f,
+            0f, 0.25f,      1f,     0f,     0f,
     };
 
     private String vertexShaderSource;          // 订单着色器
     private String fragmentShaderSource;        // 片段着色器
 
-    private static final String U_COLOR = "u_Color";
-    private int uColorLocation;
     private static final String A_POSITION = "a_Position";
     private int aPositionLocation;
+    private static final String A_COLOR = "a_Color";
+    private int aColorLocation;
+
 
     public HockeyRenderer(Context context) {
         vertexData = ByteBuffer.allocateDirect(tableVerticesWithTriangles.length * BYTES_PER_FLOAT)
@@ -74,19 +65,23 @@ public class HockeyRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         // 设置清空屏幕用的颜色
-        GLES20.glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         // 构建程序
         int programId = ShaderHelper.buildProgram(vertexShaderSource, fragmentShaderSource);
         GLES20.glUseProgram(programId);
 
-        uColorLocation = GLES20.glGetUniformLocation(programId, U_COLOR);
         aPositionLocation = GLES20.glGetAttribLocation(programId, A_POSITION);
+        aColorLocation = GLES20.glGetAttribLocation(programId, A_COLOR);
 
         // 让OpenGL到缓冲区vertexData中寻找a_Position对应的数据
         vertexData.position(0);
-        GLES20.glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GLES20.GL_FLOAT, false, 0, vertexData);
+        GLES20.glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GLES20.GL_FLOAT, false, STRIDE, vertexData);
         GLES20.glEnableVertexAttribArray(aPositionLocation);
+
+        vertexData.position(2);
+        GLES20.glVertexAttribPointer(aColorLocation, COLOR_COMPONENT_COUNT, GLES20.GL_FLOAT, false, STRIDE, vertexData);
+        GLES20.glEnableVertexAttribArray(aColorLocation);
     }
 
     // Surface尺寸变化时调用，横竖屏切换调用。
@@ -103,21 +98,15 @@ public class HockeyRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        // 更新着色器代码中u_Color的值
-        GLES20.glUniform4f(uColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
-//        // 告诉OpenGL要画三角形，0表示从顶点数组的开头处开始读顶点，6表示读取6组元素，所以会画两个三角形。
-//        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0 ,6);
+        // 告诉OpenGL要画三角形，0表示从顶点数组的开头处开始读顶点，6表示读取6组元素，所以会画两个三角形。
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 6);
 
         // 绘制线
-        GLES20.glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
         // 从数组的第6组开始，读取两组元素。
         GLES20.glDrawArrays(GLES20.GL_LINES, 6, 2);
 
         // 绘制两个点
-        GLES20.glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
         GLES20.glDrawArrays(GLES20.GL_POINTS, 8, 1);
-        GLES20.glUniform4f(uColorLocation, 0.0f, 1.0f, 0.0f, 1.0f);
         GLES20.glDrawArrays(GLES20.GL_POINTS, 9, 1);
     }
 

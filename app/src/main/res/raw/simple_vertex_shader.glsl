@@ -1,8 +1,10 @@
 attribute vec4 a_Position;
+attribute vec4 a_Color;
+
+varying vec4 v_Color;
 
 void main() {
-    // 内置变量，用于顶点着色器顶点位置
+    v_Color = a_Color;
     gl_Position = a_Position;
-    // 内置变量，用于顶点着色器光栅后的点大小，像素个数
-    gl_PointSize = 10.0;                            // 指定点的大小五为10.0
+    gl_PointSize = 20.0;
 }
