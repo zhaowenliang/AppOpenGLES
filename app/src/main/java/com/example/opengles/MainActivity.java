@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.opengles.custom.HockeyRenderer;
+import com.example.opengles.custom.HockeyRenderer2;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -41,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
         // 初始化
         glSurfaceView.setEGLContextClientVersion(2);    // 指定版本
-        glSurfaceView.setRenderer(new HockeyRenderer(this));        // 指定渲染器
+//        glSurfaceView.setRenderer(new HockeyRenderer(this));        // 指定渲染器
+        glSurfaceView.setRenderer(new HockeyRenderer2(this));        // 指定渲染器
         rendererSet = true;
 
         // 设置页面View
