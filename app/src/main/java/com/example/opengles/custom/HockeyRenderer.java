@@ -6,6 +6,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
 import com.example.opengles.R;
+import com.example.opengles.utils.MatrixHelper;
 import com.example.opengles.utils.ShaderHelper;
 import com.example.opengles.utils.TextResourceReader;
 
@@ -44,6 +45,8 @@ public class HockeyRenderer implements GLSurfaceView.Renderer {
     };
 
     private final float[] projectionMatrix = new float[16];
+    private final float[] modelMatrix = new float[16];
+    private final float[] uMatrix = new float[16];
 
     private String vertexShaderSource;          // 订单着色器
     private String fragmentShaderSource;        // 片段着色器
@@ -95,12 +98,20 @@ public class HockeyRenderer implements GLSurfaceView.Renderer {
         // 设置区域，当前是全屏。
         GLES20.glViewport(0, 0, width, height);
 
-        final float aspectRatio = width > height ? (float) width / (float) height : (float) height / (float) width;
-        if (width > height) {
-            Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f);
-        } else {
-            Matrix.orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
-        }
+//        final float aspectRatio = width > height ? (float) width / (float) height : (float) height / (float) width;
+//        if (width > height) {
+//            Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f);
+//        } else {
+//            Matrix.orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
+//        }
+
+        MatrixHelper.perspectiveM(projectionMatrix, 45, (float) width / (float) height, 1f, 100f);
+
+        Matrix.setIdentityM(modelMatrix, 0);
+        Matrix.translateM(modelMatrix, 0, 0f, 0f, -3f);         // 平移
+        Matrix.rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f);    // 旋转
+
+        Matrix.multiplyMM(uMatrix, 0, projectionMatrix, 0, modelMatrix, 0);
     }
 
     // 绘制每一帧时调用，一定要绘制一些东西，即使只是清空屏幕。
@@ -110,7 +121,8 @@ public class HockeyRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        GLES20.glUniformMatrix4fv(uMatrixLocation,1, false,  projectionMatrix,0);
+//        GLES20.glUniformMatrix4fv(uMatrixLocation,1, false,  projectionMatrix,0);
+        GLES20.glUniformMatrix4fv(uMatrixLocation,1, false,  uMatrix,0);
 
         // 告诉OpenGL要画三角形，0表示从顶点数组的开头处开始读顶点，6表示读取6组元素，所以会画两个三角形。
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 6);
