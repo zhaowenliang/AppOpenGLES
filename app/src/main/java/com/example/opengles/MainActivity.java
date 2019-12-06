@@ -2,6 +2,7 @@ package com.example.opengles;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ConfigurationInfo;
 import android.os.Bundle;
 import android.view.View;
@@ -56,6 +57,6 @@ public class MainActivity extends AppCompatActivity {
          Android 5.0 开始支持 OpenGL ES 3.1
          */
 
-
+        startActivity(new Intent(this, RendererActivity.class));
     }
 }
