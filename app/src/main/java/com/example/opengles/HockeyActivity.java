@@ -1,18 +1,18 @@
 package com.example.opengles;
 
+import android.graphics.Color;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.opengles.custom.HockeyRenderer;
+import com.example.opengles.custom.ColorRenderer;
 
 
 public class HockeyActivity extends AppCompatActivity {
 
     private GLSurfaceView glSurfaceView;
-    private boolean rendererSet;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -21,9 +21,9 @@ public class HockeyActivity extends AppCompatActivity {
 
         // 初始化
         glSurfaceView.setEGLContextClientVersion(2);    // 指定版本
-        glSurfaceView.setRenderer(new HockeyRenderer(this));        // 指定渲染器
-//        glSurfaceView.setRenderer(new HockeyRenderer2(this));        // 指定渲染器
-        rendererSet = true;
+        glSurfaceView.setRenderer(new ColorRenderer(Color.GRAY));
+        // glSurfaceView.setRenderer(new HockeyRenderer(this));        // 指定渲染器
+        // glSurfaceView.setRenderer(new HockeyRenderer2(this));        // 指定渲染器
 
         // 设置页面View
         setContentView(glSurfaceView);
@@ -32,17 +32,13 @@ public class HockeyActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (rendererSet) {
-            glSurfaceView.onResume();
-        }
+        glSurfaceView.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (rendererSet) {
-            glSurfaceView.onPause();
-        }
+        glSurfaceView.onPause();
     }
 
 }
