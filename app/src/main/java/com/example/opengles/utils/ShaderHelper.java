@@ -19,7 +19,7 @@ public class ShaderHelper {
      *
      * @param type       着色器类型
      * @param shaderCode 着色器代码
-     * @return 编译状态
+     * @return 着色器shader id
      */
     private static int compileShader(int type, String shaderCode) {
         // 创建一个着色器对象
@@ -59,7 +59,7 @@ public class ShaderHelper {
      *
      * @param vertexShaderId   顶点着色器Id
      * @param fragmentShaderId 片段着色器Id
-     * @return 链接状态
+     * @return 链接顶点着色器和片段着色器在一起变成单个对象 program id
      */
     public static int linkProgram(int vertexShaderId, int fragmentShaderId) {
         // 创建程序对象

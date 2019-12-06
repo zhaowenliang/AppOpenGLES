@@ -2,9 +2,11 @@ package com.example.opengles.utils;
 
 import android.util.Log;
 
+import com.example.opengles.BuildConfig;
+
 public class LogUtils {
 
-    public static boolean ON = true;
+    public static boolean ON = BuildConfig.DEBUG;
 
     public static void i(String tag, String text) {
         if (ON) {
