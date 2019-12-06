@@ -57,6 +57,6 @@ public class MainActivity extends AppCompatActivity {
          Android 5.0 开始支持 OpenGL ES 3.1
          */
 
-        startActivity(new Intent(this, RendererActivity.class));
+        startActivity(new Intent(this, HockeyActivity.class));
     }
 }
