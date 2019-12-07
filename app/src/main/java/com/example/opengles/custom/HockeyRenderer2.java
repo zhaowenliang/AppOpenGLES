@@ -52,8 +52,8 @@ public class HockeyRenderer2 implements GLSurfaceView.Renderer {
         MatrixHelper.perspectiveM(projectionMatrix, 45, (float) width / (float) height, 1f, 100f);
 
         Matrix.setIdentityM(modelMatrix, 0);
-        Matrix.translateM(modelMatrix, 0, 0f, 0f, -2.5f); //这个距离自己喜欢多大就多大
-        Matrix.rotateM(modelMatrix, 0, -30f, 1f, 0f, 0f); //这个角度也是
+        Matrix.translateM(modelMatrix, 0, 0f, 0f, -3f);          // 这个距离自己喜欢多大就多大
+        Matrix.rotateM(modelMatrix, 0, -30f, 1f, 0f, 0f);    // 这个角度也是
 
         Matrix.multiplyMM(uMatrix, 0, projectionMatrix, 0, modelMatrix, 0);
     }

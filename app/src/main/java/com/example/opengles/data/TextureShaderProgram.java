@@ -24,7 +24,7 @@ public class TextureShaderProgram extends ShaderProgram {
         uTextureUnitLocation = GLES20.glGetUniformLocation(programId, U_TEXTURE_UNIT);
 
         aPositionLocation = GLES20.glGetAttribLocation(programId, A_POSITION);
-        aTextureCoordinatesLocation = GLES20.glGetAttribLocation(aPositionLocation, A_TEXTURE_COORDINATES);
+        aTextureCoordinatesLocation = GLES20.glGetAttribLocation(programId, A_TEXTURE_COORDINATES);
     }
 
     public void setUniforms(float[] matrix, int textureId) {
