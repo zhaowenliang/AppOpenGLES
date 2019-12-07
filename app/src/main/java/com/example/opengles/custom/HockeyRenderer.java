@@ -19,15 +19,17 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class HockeyRenderer implements GLSurfaceView.Renderer {
 
-    private static final int BYTES_PER_FLOAT = 4;
+    // 一个顶点有两个位置分量（x，y）
     private static final int POSITION_COMPONENT_COUNT = 2;
+    // 一个顶点有三个颜色分量（r，g，b）
     private static final int COLOR_COMPONENT_COUNT = 3;
+    // 一个浮点数占用4个字节
+    private static final int BYTES_PER_FLOAT = 4;
+
     // 跨距，每组数据之间跨距（目前数组中一组数据包含一个坐标位置和一组颜色值）
     private static final int STRIDE = (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * BYTES_PER_FLOAT;
 
-    private FloatBuffer vertexData;
-
-    private float[] tableVerticesWithTriangles = {
+    private final float[] tableVerticesWithTriangles = {
             //  X, Y,        R, G, B
             // 三角扇形
             0,      0,      1f,     1f,     1f,
@@ -44,12 +46,16 @@ public class HockeyRenderer implements GLSurfaceView.Renderer {
             0f,     0.25f,  1f,     0f,     0f,
     };
 
-    private final float[] projectionMatrix = new float[16];
-    private final float[] modelMatrix = new float[16];
-    private final float[] uMatrix = new float[16];
+    private FloatBuffer vertexData;
 
     private String vertexShaderSource;          // 订单着色器
     private String fragmentShaderSource;        // 片段着色器
+
+    private final float[] projectionMatrix = new float[16];     // 投影矩阵
+    private final float[] modelMatrix = new float[16];          // 模型矩阵
+
+    // 投影矩阵和模型矩阵综合结算后的结果矩阵
+    private final float[] uMatrix = new float[16];
 
     private static final String A_POSITION = "a_Position";
     private int aPositionLocation;
@@ -98,19 +104,31 @@ public class HockeyRenderer implements GLSurfaceView.Renderer {
         // 设置区域，当前是全屏。
         GLES20.glViewport(0, 0, width, height);
 
+        // 在虚拟坐标空间中，拟定顶点数据
+        // 进行各种投影操作
+        // 转化成着色器gl_Position
+        // 透视除法
+        // 归一化设备坐标
+        // 视口变换
+        // 窗口坐标
+
+        // 计算正交投影矩阵（将坐标放入虚拟空间计算位置，然后使用正交投影将其转化为归一化设备坐标，解决横竖屏切换宽高比变化问题）
 //        final float aspectRatio = width > height ? (float) width / (float) height : (float) height / (float) width;
 //        if (width > height) {
-//            Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f);
+//            Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1F, 1F, -1F, 1F);
 //        } else {
-//            Matrix.orthoM(projectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
+//            Matrix.orthoM(projectionMatrix, 0, -1F, 1F, -aspectRatio, aspectRatio, -1F, 1F);
 //        }
 
+        // 计算透视投影矩阵
         MatrixHelper.perspectiveM(projectionMatrix, 45, (float) width / (float) height, 1f, 100f);
 
+        // 把模型矩阵设为单位矩阵，再沿着z轴平移，然后旋转
         Matrix.setIdentityM(modelMatrix, 0);
         Matrix.translateM(modelMatrix, 0, 0f, 0f, -3f);         // 平移
         Matrix.rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f);    // 旋转
 
+        // 综合计算结果矩阵
         Matrix.multiplyMM(uMatrix, 0, projectionMatrix, 0, modelMatrix, 0);
     }
 
@@ -121,10 +139,13 @@ public class HockeyRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-//        GLES20.glUniformMatrix4fv(uMatrixLocation,1, false,  projectionMatrix,0);
+        // 将正交投影矩阵传递到着色器shader
+        // GLES20.glUniformMatrix4fv(uMatrixLocation, 1, false, projectionMatrix, 0);
+
+        // 将经过透视投影矩阵和模型矩阵综合计算后的结果矩阵传递到着色器shader
         GLES20.glUniformMatrix4fv(uMatrixLocation,1, false,  uMatrix,0);
 
-        // 告诉OpenGL要画三角形，0表示从顶点数组的开头处开始读顶点，6表示读取6组元素，所以会画两个三角形。
+        // 告诉OpenGL要画三角形，0表示从顶点数组的开头处开始读顶点，6表示读取6组元素，绘制三角扇
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 6);
 
         // 绘制线
